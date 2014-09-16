@@ -47,9 +47,19 @@ uniform sampler1D transferFunc_;
 
 vec3 calculateGradient(in vec3 samplePosition) {
     const vec3 h = volumeStruct_.datasetDimensionsRCP_;
-    // Implement central differences
+    
+    //f(x+1)-f(x-1)
+    
+    float xVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x+1,samplePosition.y,samplePosition.z)) - 
+		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x-1,samplePosition.y,samplePosition.z));
+    float yVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y+1,samplePosition.z)) - 
+		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y-1,samplePosition.z));
+    float zVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z+1)) - 
+		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z-1));
 
-    return vec3(0.0);
+		 
+		 
+    return vec3(xVal,yVal,zVal);
 }
 
 vec3 applyPhongShading(in vec3 pos, in vec3 gradient, in vec3 ka, in vec3 kd, in vec3 ks) {
@@ -81,14 +91,15 @@ void rayTraversal(in vec3 first, in vec3 last) {
         // if opacity greater zero, apply compositing
         if (color.a > 0.0) {
             color.a = 1.0 - pow(1.0 - color.a, samplingStepSize_ * SAMPLING_BASE_INTERVAL_RCP);
+            
             // Insert your front-to-back alpha compositing code here
-
+	    
         }
 
         // early ray termination
         if (result.a > 1.0)
             finished = true;
-        
+        c_rayca
         t += tIncr;
         finished = finished || (t > tEnd);
     }
