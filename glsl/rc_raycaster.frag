@@ -52,20 +52,34 @@ vec3 calculateGradient(in vec3 samplePosition) {
     
     float xVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x+1,samplePosition.y,samplePosition.z)) - 
 		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x-1,samplePosition.y,samplePosition.z));
+    xVal /= 2*h.x;
+    
     float yVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y+1,samplePosition.z)) - 
 		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y-1,samplePosition.z));
+    yVal /= 2*h.y;
+    
     float zVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z+1)) - 
 		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z-1));
-
-		 
-		 
+    zVal /= 2*h.z;
+    
     return vec3(xVal,yVal,zVal);
 }
 
 vec3 applyPhongShading(in vec3 pos, in vec3 gradient, in vec3 ka, in vec3 kd, in vec3 ks) {
     // Implement phong shading
+   
+   vec3 lightDir = normalize(lightSource_.position_ - pos);
+   vec3 camDir = normalize(cameraPosition_ - pos);
+   vec3 specVec = normalize(camDir + lightDir);
+   vec3 ambient = lightSource_.ambientColor_*ka;
+   vec3 spec = pow(max(dot(abs(gradient), (camDir+lightDir)/2),0),shininess_)*lightSource_.ambientColor_*ks;
+   
+   vec3 diffuse = max(dot(abs(gradient),lightDir),0)*lightSource_.diffuseColor_*kd;
+
+    vec3 color = ambient+diffuse+spec;
+   
     
-    return vec3(0.0);
+    return diffuse;
 }
 
 void rayTraversal(in vec3 first, in vec3 last) {
@@ -85,21 +99,25 @@ void rayTraversal(in vec3 first, in vec3 last) {
         
         vec3 gradient = calculateGradient(samplePos);
 
-//        color.rgb = applyPhongShading(samplePos, gradient, color.rgb, color.rgb, vec3(1.0,1.0,1.0));
+// 	color.rgb = applyPhongShading(samplePos, gradient, color.rgb, color.rgb, vec3(1.0,1.0,1.0));
 
         vec4 color = texture(transferFunc_, intensity);
+        
+        color.rgb = applyPhongShading(samplePos, gradient, color.rgb, color.rgb, vec3(1.0,1.0,1.0));
+        
         // if opacity greater zero, apply compositing
         if (color.a > 0.0) {
             color.a = 1.0 - pow(1.0 - color.a, samplingStepSize_ * SAMPLING_BASE_INTERVAL_RCP);
             
             // Insert your front-to-back alpha compositing code here
-	    
+            result.xyz = result.xyz*result.a+(1-result.a)*color.xyz;
+            result.a = result.a + (1-result.a)*color.a;            
+            
         }
 
         // early ray termination
         if (result.a > 1.0)
-            finished = true;
-        c_rayca
+            finished = true;	
         t += tIncr;
         finished = finished || (t > tEnd);
     }
