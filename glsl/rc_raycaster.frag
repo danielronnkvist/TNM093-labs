@@ -60,7 +60,7 @@ vec3 calculateGradient(in vec3 samplePosition) {
     float zVal = texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z+h.z)).a) -
 		         texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z-h.z)).a);
 
-    return vec3(xVal,yVal,zVal)/(2*h);
+    return normalize(vec3(xVal,yVal,zVal)/(2*h));
 }
 
 vec3 applyPhongShading(in vec3 pos, in vec3 gradient, in vec3 ka, in vec3 kd, in vec3 ks) {
@@ -69,15 +69,15 @@ vec3 applyPhongShading(in vec3 pos, in vec3 gradient, in vec3 ka, in vec3 kd, in
    vec3 lightDir = normalize(lightSource_.position_ - pos);
    vec3 camDir = normalize(cameraPosition_ - pos);
 
-   vec3 ambient = lightSource_.ambientColor_*ka;
-   vec3 spec = pow(max(dot(abs(gradient), (camDir+lightDir)/2),0),shininess_)*lightSource_.specularColor_*ks;
+   vec3 ambient = min(max(lightSource_.ambientColor_*ka,0),1);
+   vec3 spec = pow(min(max(dot((gradient), (camDir+lightDir)/2),0),1),shininess_)*lightSource_.specularColor_*ks;
 
-   vec3 diffuse = max(dot(abs(gradient),lightDir),0)*lightSource_.diffuseColor_*kd;
+   vec3 diffuse = min(max(dot((gradient),lightDir),0),1)*lightSource_.diffuseColor_*kd;
 
     vec3 color = ambient+diffuse+spec;
 
 
-    return diffuse;
+    return color;
 }
 
 void rayTraversal(in vec3 first, in vec3 last) {
@@ -96,8 +96,6 @@ void rayTraversal(in vec3 first, in vec3 last) {
         float intensity = texture(volumeStruct_.volume_, samplePos).a;
 
         vec3 gradient = calculateGradient(samplePos);
-
-// 	color.rgb = applyPhongShading(samplePos, gradient, color.rgb, color.rgb, vec3(1.0,1.0,1.0));
 
         vec4 color = texture(transferFunc_, intensity);
 
