@@ -46,23 +46,21 @@ uniform sampler1D transferFunc_;
 /////////////////////////////////////////////////////
 
 vec3 calculateGradient(in vec3 samplePosition) {
+
     const vec3 h = volumeStruct_.datasetDimensionsRCP_;
 
     //f(x+1)-f(x-1)
 
-    float xVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x+h.x,samplePosition.y,samplePosition.z)) -
-		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x-h.x,samplePosition.y,samplePosition.z));
-    xVal /= 2*h.x;
+    float xVal = texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x+h.x,samplePosition.y,samplePosition.z)).a) -
+		         texture1D(transferFunc_,texture3D(volumeStruct_.volume_, vec3(samplePosition.x-h.x,samplePosition.y,samplePosition.z)).a);
 
-    float yVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y+h.y,samplePosition.z)) -
-		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y-h.y,samplePosition.z));
-    yVal /= 2*h.y;
+    float yVal = texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y+h.y,samplePosition.z)).a) -
+		         texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y-h.y,samplePosition.z)).a);
 
-    float zVal = texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z+h.z)) -
-		 texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z-h.z));
-    zVal /= 2*h.z;
+    float zVal = texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z+h.z)).a) -
+		         texture1D(transferFunc_, texture3D(volumeStruct_.volume_, vec3(samplePosition.x,samplePosition.y,samplePosition.z-h.z)).a);
 
-    return vec3(xVal,yVal,zVal);
+    return vec3(xVal,yVal,zVal)/(2*h);
 }
 
 vec3 applyPhongShading(in vec3 pos, in vec3 gradient, in vec3 ka, in vec3 kd, in vec3 ks) {
@@ -70,9 +68,9 @@ vec3 applyPhongShading(in vec3 pos, in vec3 gradient, in vec3 ka, in vec3 kd, in
 
    vec3 lightDir = normalize(lightSource_.position_ - pos);
    vec3 camDir = normalize(cameraPosition_ - pos);
-   vec3 specVec = normalize(camDir + lightDir);
+
    vec3 ambient = lightSource_.ambientColor_*ka;
-   vec3 spec = pow(max(dot(abs(gradient), (camDir+lightDir)/2),0),shininess_)*lightSource_.ambientColor_*ks;
+   vec3 spec = pow(max(dot(abs(gradient), (camDir+lightDir)/2),0),shininess_)*lightSource_.specularColor_*ks;
 
    vec3 diffuse = max(dot(abs(gradient),lightDir),0)*lightSource_.diffuseColor_*kd;
 
@@ -110,7 +108,7 @@ void rayTraversal(in vec3 first, in vec3 last) {
             color.a = 1.0 - pow(1.0 - color.a, samplingStepSize_ * SAMPLING_BASE_INTERVAL_RCP);
 
             // Insert your front-to-back alpha compositing code here
-            result.xyz = result.xyz*result.a+(1-result.a)*color.xyz;
+            result.xyz = result.xyz*result.a + (1-result.a)*color.xyz;
             result.a = result.a + (1-result.a)*color.a;
 
         }
