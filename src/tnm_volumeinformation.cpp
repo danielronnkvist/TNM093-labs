@@ -133,7 +133,11 @@ void TNMVolumeInformation::process() {
 				// Compute the gradient direction using either forward, central, or backward
 				// calculation and then take the magnitude (=length) of the vector.
 				// Hint:  tgt::vec3 is a class that can calculate the length for you
+				float xVal = (v211 - v011)/2;
+				float yVal = (v121 - v101)/2;
+				float zVal = (v112 - v110)/2;
 
+				gradientMagnitude = length(tgt::vec3(xVal*xVal + yVal*yVal + zVal*zVal));
 
 				_data->at(i).dataValues[3] = gradientMagnitude;
             }
