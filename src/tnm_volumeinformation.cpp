@@ -4,7 +4,7 @@
 namespace voreen {
 
 	const std::string loggerCat_ = "TNMVolumeInformation";
-	
+
 namespace {
 	// This ordering function allows us to sort the Data vector by the voxelIndex
 	// The extraction *should* produce a sorted list, but you never know
@@ -48,9 +48,9 @@ void TNMVolumeInformation::process() {
 	// iX is the index running over the 'x' dimension
 	// iY is the index running over the 'y' dimension
 	// iZ is the index running over the 'z' dimension
-    for (size_t iX = 0; iX < dimensions.x; ++iX) {
-        for (size_t iY = 0; iY < dimensions.y; ++iY) {
-            for (size_t iZ = 0; iZ < dimensions.z; ++iZ) {
+    for (size_t iX = 1; iX < dimensions.x-1; ++iX) {
+        for (size_t iY = 1; iY < dimensions.y-1; ++iY) {
+            for (size_t iZ = 1; iZ < dimensions.z-1; ++iZ) {
 				// i is a unique identifier for the voxel calculated by the following
 				// (probably one of the most important) formulas:
 				// iZ*dimensions.x*dimensions.y + iY*dimensions.x + iX;
@@ -60,24 +60,60 @@ void TNMVolumeInformation::process() {
 				_data->at(i).voxelIndex = i;
                 //
 				// use iX, iY, iZ, i, and the VolumeUInt16::voxel method to derive the measures here
-                //
+				int v111 = volume->voxel(i);
 
-				//
+				int v000, v001, v002, v010, v011, v012, v020, v021, v022, v100, v101, v102, v110, v112, v120, v121, v122, v200, v201, v202, v210, v211, v212, v220, v221, v222 = 0;
+				v000 = volume->voxel(iX-1, iY-1, iZ-1);
+				v001 = volume->voxel(iX-1, iY-1, iZ);
+				v002 = volume->voxel(iX-1, iY-1, iZ+1);
+				v010 = volume->voxel(iX-1, iY, iZ);
+				v011 = volume->voxel(iX-1, iY, iZ);
+				v012 = volume->voxel(iX-1, iY, iZ+1);
+				v020 = volume->voxel(iX-1, iY+1, iZ);
+				v021 = volume->voxel(iX-1, iY+1, iZ);
+				v022 = volume->voxel(iX-1, iY+1, iZ+1);
+				v100 = volume->voxel(iX, iY-1, iZ-1);
+				v101 = volume->voxel(iX, iY-1, iZ);
+				v102 = volume->voxel(iX, iY-1, iZ+1);
+				v110 = volume->voxel(iX, iY, iZ);
+				v112 = volume->voxel(iX, iY, iZ+1);
+				v120 = volume->voxel(iX, iY+1, iZ);
+				v121 = volume->voxel(iX, iY+1, iZ);
+				v122 = volume->voxel(iX, iY+1, iZ+1);
+				v200 = volume->voxel(iX+1, iY-1, iZ-1);
+				v201 = volume->voxel(iX+1, iY-1, iZ);
+				v202 = volume->voxel(iX+1, iY-1, iZ+1);
+				v210 = volume->voxel(iX+1, iY, iZ);
+				v211 = volume->voxel(iX+1, iY, iZ);
+				v212 = volume->voxel(iX+1, iY, iZ+1);
+				v220 = volume->voxel(iX+1, iY+1, iZ);
+				v221 = volume->voxel(iX+1, iY+1, iZ);
+				v222 = volume->voxel(iX+1, iY+1, iZ+1);
+
+
 				// Intensity
 				//
 				float intensity = -1.f;
+				intensity = volume->voxel(i);
 				// Retrieve the intensity using the 'VolumeUInt16's voxel method
-
-
+				//
 				_data->at(i).dataValues[0] = intensity;
 
 				//
 				// Average
 				//
-				float average = -1.f;
-				// Compute the average; the voxel method accepts both a single parameter
-				// as well as three parameters
-
+				float average = -1.0f;
+ 				// Compute the average; the voxel method accepts both a single parameter
+ 				average = v000 + v001 + v002 +
+ 						  v010 + v011 + v012 +
+ 						  v020 + v021 + v022 +
+ 						  v100 + v101 + v102 +
+ 						  v110 + v111 + v112 +
+ 						  v120 + v121 + v122 +
+ 						  v200 + v201 + v202 +
+ 						  v210 + v211 + v212 +
+ 						  v220 + v221 + v222;
+ 						average /= 27.0f;
 
 				_data->at(i).dataValues[1] = average;
 
