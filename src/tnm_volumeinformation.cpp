@@ -56,90 +56,92 @@ void TNMVolumeInformation::process() {
 				// iZ*dimensions.x*dimensions.y + iY*dimensions.x + iX;
                 const size_t i = VolumeUInt16::calcPos(volume->getDimensions(), tgt::svec3(iX, iY, iZ));
 
-				// Setting the unique identifier as the voxelIndex
-				_data->at(i).voxelIndex = i;
-                //
-				// use iX, iY, iZ, i, and the VolumeUInt16::voxel method to derive the measures here
-				int v111 = volume->voxel(i);
+		// Setting the unique identifier as the voxelIndex
+		_data->at(i).voxelIndex = i;
+//
+		// use iX, iY, iZ, i, and the VolumeUInt16::voxel method to derive the measures here
 
-				int v000, v001, v002, v010, v011, v012, v020, v021, v022, v100, v101, v102, v110, v112, v120, v121, v122, v200, v201, v202, v210, v211, v212, v220, v221, v222 = 0;
-				v000 = volume->voxel(iX-1, iY-1, iZ-1);
-				v001 = volume->voxel(iX-1, iY-1, iZ);
-				v002 = volume->voxel(iX-1, iY-1, iZ+1);
-				v010 = volume->voxel(iX-1, iY, iZ);
-				v011 = volume->voxel(iX-1, iY, iZ);
-				v012 = volume->voxel(iX-1, iY, iZ+1);
-				v020 = volume->voxel(iX-1, iY+1, iZ);
-				v021 = volume->voxel(iX-1, iY+1, iZ);
-				v022 = volume->voxel(iX-1, iY+1, iZ+1);
-				v100 = volume->voxel(iX, iY-1, iZ-1);
-				v101 = volume->voxel(iX, iY-1, iZ);
-				v102 = volume->voxel(iX, iY-1, iZ+1);
-				v110 = volume->voxel(iX, iY, iZ);
-				v112 = volume->voxel(iX, iY, iZ+1);
-				v120 = volume->voxel(iX, iY+1, iZ);
-				v121 = volume->voxel(iX, iY+1, iZ);
-				v122 = volume->voxel(iX, iY+1, iZ+1);
-				v200 = volume->voxel(iX+1, iY-1, iZ-1);
-				v201 = volume->voxel(iX+1, iY-1, iZ);
-				v202 = volume->voxel(iX+1, iY-1, iZ+1);
-				v210 = volume->voxel(iX+1, iY, iZ);
-				v211 = volume->voxel(iX+1, iY, iZ);
-				v212 = volume->voxel(iX+1, iY, iZ+1);
-				v220 = volume->voxel(iX+1, iY+1, iZ);
-				v221 = volume->voxel(iX+1, iY+1, iZ);
-				v222 = volume->voxel(iX+1, iY+1, iZ+1);
-
-
-				// Intensity
-				//
-				float intensity = -1.f;
-				intensity = volume->voxel(i);
-				// Retrieve the intensity using the 'VolumeUInt16's voxel method
-				//
-				_data->at(i).dataValues[0] = intensity;
-
-				//
-				// Average
-				//
-				float average = -1.0f;
- 				// Compute the average; the voxel method accepts both a single parameter
- 				average = v000 + v001 + v002 +
- 						  v010 + v011 + v012 +
- 						  v020 + v021 + v022 +
- 						  v100 + v101 + v102 +
- 						  v110 + v111 + v112 +
- 						  v120 + v121 + v122 +
- 						  v200 + v201 + v202 +
- 						  v210 + v211 + v212 +
- 						  v220 + v221 + v222;
- 						average /= 27.0f;
-
-				_data->at(i).dataValues[1] = average;
-
-				//
-				// Standard deviation
-				//
-				float stdDeviation = -1.f;
-				// Compute the standard deviation
+		int v[3][3][3] = {0};
+		v[0][0][0] = volume->voxel(iX-1, iY-1, iZ-1);
+		v[0][0][1] = volume->voxel(iX-1, iY-1, iZ);
+		v[0][0][2] = volume->voxel(iX-1, iY-1, iZ+1);
+		v[0][1][0] = volume->voxel(iX-1, iY, iZ);
+		v[0][1][1] = volume->voxel(iX-1, iY, iZ);
+		v[0][1][2] = volume->voxel(iX-1, iY, iZ+1);
+		v[0][2][0] = volume->voxel(iX-1, iY+1, iZ);
+		v[0][2][1] = volume->voxel(iX-1, iY+1, iZ);
+		v[0][2][2] = volume->voxel(iX-1, iY+1, iZ+1);
+		v[1][0][0] = volume->voxel(iX, iY-1, iZ-1);
+		v[1][0][1] = volume->voxel(iX, iY-1, iZ);
+		v[1][0][2] = volume->voxel(iX, iY-1, iZ+1);
+		v[1][1][0] = volume->voxel(iX, iY, iZ-1);
+		v[1][1][1] = volume->voxel(iX, iY, iZ);
+		v[1][1][2] = volume->voxel(iX, iY, iZ+1);
+		v[1][2][0] = volume->voxel(iX, iY+1, iZ);
+		v[1][2][1] = volume->voxel(iX, iY+1, iZ);
+		v[1][2][2] = volume->voxel(iX, iY+1, iZ+1);
+		v[2][0][0] = volume->voxel(iX+1, iY-1, iZ-1);
+		v[2][0][1] = volume->voxel(iX+1, iY-1, iZ);
+		v[2][0][2] = volume->voxel(iX+1, iY-1, iZ+1);
+		v[2][1][0] = volume->voxel(iX+1, iY, iZ);
+		v[2][1][1] = volume->voxel(iX+1, iY, iZ);
+		v[2][1][2] = volume->voxel(iX+1, iY, iZ+1);
+		v[2][2][0] = volume->voxel(iX+1, iY+1, iZ);
+		v[2][2][1] = volume->voxel(iX+1, iY+1, iZ);
+		v[2][2][2] = volume->voxel(iX+1, iY+1, iZ+1);
 
 
-				_data->at(i).dataValues[2] = stdDeviation;
+		// Intensity
+		//
+		float intensity = -1.f;
+		intensity = volume->voxel(i);
+		// Retrieve the intensity using the 'VolumeUInt16's voxel method
+		//
+		_data->at(i).dataValues[0] = intensity;
 
-				//
-				// Gradient magnitude
-				//
-				float gradientMagnitude = -1.f;
-				// Compute the gradient direction using either forward, central, or backward
-				// calculation and then take the magnitude (=length) of the vector.
-				// Hint:  tgt::vec3 is a class that can calculate the length for you
-				float xVal = (v211 - v011)/2;
-				float yVal = (v121 - v101)/2;
-				float zVal = (v112 - v110)/2;
+		//
+		// Average
+		//
+		float average = 0.0f;
+		// Compute the average; the voxel method accepts both a single parameter
 
-				gradientMagnitude = length(tgt::vec3(xVal*xVal + yVal*yVal + zVal*zVal));
+		
+		for(int i = 0; i < 3;  i++)
+		  for(int j = 0; j < 3;  j++)
+		    for(int k = 0; k < 3; k++)
+		      average += v[i][j][k];
+    
+		average /= 27.0f;
 
-				_data->at(i).dataValues[3] = gradientMagnitude;
+		_data->at(i).dataValues[1] = average;
+
+		//
+		// Standard deviation
+		//
+		float stdDeviation = 0.f;
+		// Compute the standard deviation
+		for(int i = 0; i < 3;  i++)
+		  for(int j = 0; j < 3;  j++)
+		    for(int k = 0; k < 3; k++)
+		      stdDeviation += (pow(v[i][j][k]-average,2));
+		stdDeviation = sqrt(stdDeviation);
+
+		_data->at(i).dataValues[2] = stdDeviation;
+
+		//
+		// Gradient magnitude
+		//
+		float gradientMagnitude = -1.f;
+		// Compute the gradient direction using either forward, central, or backward
+		// calculation and then take the magnitude (=length) of the vector.
+		// Hint:  tgt::vec3 is a class that can calculate the length for you
+		float xVal = (v[2][1][1] - v[0][1][1])/2;
+		float yVal = (v[1][2][1] - v[1][0][1])/2;
+		float zVal = (v[1][1][2] - v[1][1][0])/2;
+
+		gradientMagnitude = length(tgt::vec3(xVal*xVal + yVal*yVal + zVal*zVal));
+
+		_data->at(i).dataValues[3] = gradientMagnitude;
             }
         }
     }
