@@ -179,11 +179,109 @@ void TNMParallelCoordinates::handleMouseRelease(tgt::MouseEvent* e) {
 
 }
 
-void TNMParallelCoordinates::renderLines() {
-	//
-    // Implement your line drawing
-	//
+void TNMParallelCoordinates::renderLines() 
+{
+  //
+  // Implement your line drawing
+  //
+  if(!_inport.hasData())
+    return;
+  
+  const Data& data = *(_inport.getData());
+  
+  float maxIntensity = data[0].dataValues[0];
+  float minIntensity = data[0].dataValues[0];
+  
+  float maxAvg = data[0].dataValues[1];
+  float minAvg = data[0].dataValues[1];
+  
+  float maxStdDev = data[0].dataValues[2];
+  float minStdDev = data[0].dataValues[2];
+  
+  float maxGrad = data[0].dataValues[3];
+  float minGrad = data[0].dataValues[3];
+  
+  for(int i = 0; i < data.size(); i++)
+  {
+    const float intensityVal= data[i].dataValues[0];
+    const float avgVal= data[i].dataValues[1];
+    const float stdDevVal = data[i].dataValues[2];
+    const float gradVal = data[i].dataValues[3];
+    
+    if(intensityVal > maxIntensity)
+      maxIntensity = intensityVal;
+    if(intensityVal < minIntensity)
+      minIntensity = intensityVal;
+    
+    if(avgVal > maxAvg)
+      maxAvg = avgVal;
+    if(avgVal < minAvg)
+      minAvg = avgVal;
+    
+    if(stdDevVal > maxStdDev)
+      maxStdDev = stdDevVal;
+    if(stdDevVal < minStdDev)
+      minStdDev = stdDevVal;
 
+    if(gradVal > maxGrad)
+      maxGrad = gradVal;
+    if(gradVal < minGrad)
+      minGrad = gradVal;
+  
+    
+  }
+  
+  
+  LINFOC("intensity", "MAX: " << maxIntensity << " MIN: " << minIntensity);
+  LINFOC("Average", "MAX: " << maxAvg << " MIN: " << minAvg);
+  LINFOC("Standard Dev", "MAX: " << maxStdDev << " MIN: " << minStdDev);
+  LINFOC("Gradient", "MAX: " << maxGrad << " MIN: " << minGrad);
+  
+  for(int i = 0; i < data.size(); i++)
+  {
+    const float intensityVal= data[i].dataValues[0];
+    const float avgVal= data[i].dataValues[1];
+    const float stdDevVal = data[i].dataValues[2];
+    const float gradVal = data[i].dataValues[3];
+   
+    if(intensityVal == 0 && avgVal ==0)
+      continue;
+    //(värde-min)/(max-min)
+    
+    float intNorm = (intensityVal-minIntensity)/(maxIntensity-minIntensity);
+    float avgNorm = (avgVal-minAvg)/(maxAvg-minAvg);
+    float stdDevNorm = (stdDevVal-minStdDev)/(maxStdDev-minStdDev);
+    float gradNorm = (gradVal-minGrad)/(maxGrad-minGrad);
+    
+    
+    glBegin(GL_LINES);
+    glColor3f(1,1,1);
+    glVertex2f(-0.33, -1);
+    glVertex2f(-0.33, 1);
+    glVertex2f(0.33, -1);
+    glVertex2f(0.33, 1);
+    
+    glColor3f(1,0,0);
+    glVertex2f(-1, intNorm);
+    glVertex2f(-0.33, avgNorm);
+    
+    glVertex2f(-0.33, avgNorm);
+    glVertex2f(0.33, stdDevNorm);
+    
+    glVertex2f(0.33, stdDevNorm);
+    glVertex2f(1, gradNorm);
+    glEnd();
+      
+    break;
+    
+  }
+  
+  //0, intensity
+  //1, avg
+  //2, stddev
+  //3, gradient mag
+  
+  
 }
 
 void TNMParallelCoordinates::renderLinesPicking() {
