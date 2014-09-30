@@ -84,6 +84,14 @@ TNMParallelCoordinates::TNMParallelCoordinates()
     // _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionTop, 0, /* fix startposition */));
     // ...
 	//
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionTop, 0,tgt::vec2(-1,1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionBottom, 1,tgt::vec2(-1,-1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionTop, 2,tgt::vec2(-.33,1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionBottom, 3,tgt::vec2(-.33,-1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionTop, 4,tgt::vec2(.33,1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionBottom, 5,tgt::vec2(.33,-1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionTop, 6,tgt::vec2(1,1)));
+    _handles.push_back(AxisHandle(AxisHandle::AxisHandlePositionBottom, 7,tgt::vec2(1,-1)));
 }
 
 TNMParallelCoordinates::~TNMParallelCoordinates() {
@@ -230,13 +238,7 @@ void TNMParallelCoordinates::renderLines()
   
     
   }
-  
-  
-  LINFOC("intensity", "MAX: " << maxIntensity << " MIN: " << minIntensity);
-  LINFOC("Average", "MAX: " << maxAvg << " MIN: " << minAvg);
-  LINFOC("Standard Dev", "MAX: " << maxStdDev << " MIN: " << minStdDev);
-  LINFOC("Gradient", "MAX: " << maxGrad << " MIN: " << minGrad);
-  
+    
   for(int i = 0; i < data.size(); i++)
   {
     const float intensityVal= data[i].dataValues[0];
@@ -244,14 +246,12 @@ void TNMParallelCoordinates::renderLines()
     const float stdDevVal = data[i].dataValues[2];
     const float gradVal = data[i].dataValues[3];
    
-    if(intensityVal == 0 && avgVal ==0)
-      continue;
     //(värde-min)/(max-min)
     
-    float intNorm = (intensityVal-minIntensity)/(maxIntensity-minIntensity);
-    float avgNorm = (avgVal-minAvg)/(maxAvg-minAvg);
-    float stdDevNorm = (stdDevVal-minStdDev)/(maxStdDev-minStdDev);
-    float gradNorm = (gradVal-minGrad)/(maxGrad-minGrad);
+    float intNorm = -1+(intensityVal-minIntensity)*2/(maxIntensity-minIntensity);
+    float avgNorm = -1+(avgVal-minAvg)*2/(maxAvg-minAvg);
+    float stdDevNorm = -1+(stdDevVal-minStdDev)*2/(maxStdDev-minStdDev);
+    float gradNorm = -1+(gradVal-minGrad)*2/(maxGrad-minGrad);
     
     
     glBegin(GL_LINES);
@@ -271,9 +271,7 @@ void TNMParallelCoordinates::renderLines()
     glVertex2f(0.33, stdDevNorm);
     glVertex2f(1, gradNorm);
     glEnd();
-      
-    break;
-    
+         
   }
   
   //0, intensity
