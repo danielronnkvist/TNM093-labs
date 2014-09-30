@@ -147,23 +147,23 @@ void TNMParallelCoordinates::handleMouseClick(tgt::MouseEvent* e) {
 
 
 
-	int lineId = -1;
-	// Derive the id of the line that was clicked based on the color scheme that you devised in the
-	// renderLinesPicking method
+    int lineId = -1;
+    // Derive the id of the line that was clicked based on the color scheme that you devised in the
+    // renderLinesPicking method
 
 
 
-	LINFOC("Picking", "Picked line index: " << lineId);
-	if (lineId != -1)
-		// We want to add it only if a line was clicked
-		_linkingList.insert(lineId);
+    LINFOC("Picking", "Picked line index: " << lineId);
+    if (lineId != -1)
+	    // We want to add it only if a line was clicked
+	    _linkingList.insert(lineId);
 
-	// if the right mouse button is pressed and no line is clicked, clear the list:
-	if ((e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT) && (lineId == -1))
-		_linkingList.clear();
+    // if the right mouse button is pressed and no line is clicked, clear the list:
+    if ((e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT) && (lineId == -1))
+	    _linkingList.clear();
 
-	// Make the list of selected indices available to the Scatterplot
-	_linkingIndices.set(_linkingList);
+    // Make the list of selected indices available to the Scatterplot
+    _linkingIndices.set(_linkingList);
 }
 
 void TNMParallelCoordinates::handleMouseMove(tgt::MouseEvent* e) {
@@ -261,7 +261,7 @@ void TNMParallelCoordinates::renderLines()
     glVertex2f(0.33, -1);
     glVertex2f(0.33, 1);
     
-    glColor3f(1,0,0);
+    glColor3f(0,1,0);
     glVertex2f(-1, intNorm);
     glVertex2f(-0.33, avgNorm);
     
