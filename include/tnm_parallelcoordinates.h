@@ -46,7 +46,7 @@ protected:
 
 	// The callback method that gets called when the mouse button is released
     void handleMouseRelease(tgt::MouseEvent* e);
-    
+
     // This class stores and renders a single handle
     // it provides access to the index for picking
     class AxisHandle {
@@ -62,7 +62,7 @@ protected:
 		// index: a unique index that gets encoded in the red channel of the picking texture
 		// position: the position (in [-1,1]) where the axis handle will be drawn
         AxisHandle(AxisHandlePosition location, int index, const tgt::vec2& position);
-        
+
 		// Returns the index of the axis handle
         int index() const;
 
@@ -74,7 +74,11 @@ protected:
 
 		// Renders the handle at the current position using the encoded picking color
         void renderPicking() const;
-        
+
+        // The current position of the handle
+        tgt::vec2 _position;
+
+
     private:
 		// The internal method that gets called by both render() and renderPicking() methods
         void renderInternal() const;
@@ -85,8 +89,6 @@ protected:
 		// The unique index of the handle
         int _index;
 
-		// The current position of the handle
-        tgt::vec2 _position;
     };
 
 private:

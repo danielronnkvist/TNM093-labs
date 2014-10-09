@@ -2,7 +2,7 @@
 #include "modules/tnm093/include/tnm_parallelcoordinates.h"
 
 namespace voreen {
-    
+
 TNMParallelCoordinates::AxisHandle::AxisHandle(AxisHandlePosition location, int index, const tgt::vec2& position)
     : _location(location)
     , _index(index)
@@ -144,8 +144,14 @@ void TNMParallelCoordinates::handleMouseClick(tgt::MouseEvent* e) {
     // The id is the id of the AxisHandle that has been clicked (the same id you assigned in the constructor)
     // id == -1 if no handle was clicked
     // Use the '_pickedIndex' member variable to store the picked index
-
-
+    if(handleId != -1)
+    {
+        _pickedHandle = handleId;
+    }
+    else
+    {
+        _pickedHandle = -1;
+    }
 
     int lineId = -1;
     // Derive the id of the line that was clicked based on the color scheme that you devised in the
@@ -172,7 +178,39 @@ void TNMParallelCoordinates::handleMouseMove(tgt::MouseEvent* e) {
     const tgt::vec2& normalizedDeviceCoordinates = (tgt::vec2(screenCoords) / tgt::vec2(_privatePort.getSize()) - 0.5f) * 2.f;
 
     // Move the stored index along its axis (if it is a valid picking point)
+    if(_pickedHandle != -1)
+    {
 
+        int handlePair = -1;
+        tgt::vec2 newPosition =  _handles.at(_pickedHandle)._position;
+
+        if(_pickedHandle%2 == 0)
+        {
+            handlePair =  _pickedHandle + 1;
+            if(normalizedDeviceCoordinates.y < _handles.at(handlePair)._position.y)
+            {
+                newPosition.y = _handles.at(handlePair)._position.y;
+            }
+            else
+            {
+                newPosition.y = normalizedDeviceCoordinates.y;
+            }
+        }
+        else
+        {
+            handlePair = _pickedHandle - 1;
+            if(normalizedDeviceCoordinates.y > _handles.at(handlePair)._position.y)
+            {
+                newPosition.y = _handles.at(handlePair)._position.y;
+            }
+            else
+            {
+                newPosition.y = normalizedDeviceCoordinates.y;
+            }
+        }
+        LINFOC("drag", "Dragging " << _pickedHandle << " with pair " << handlePair);
+        _handles.at(_pickedHandle).setPosition(newPosition);
+    }
 
 	// update the _brushingList with the indices of the lines that are not rendered anymore
 
@@ -184,48 +222,48 @@ void TNMParallelCoordinates::handleMouseMove(tgt::MouseEvent* e) {
 }
 
 void TNMParallelCoordinates::handleMouseRelease(tgt::MouseEvent* e) {
-
+    _pickedHandle = -1;
 }
 
-void TNMParallelCoordinates::renderLines() 
+void TNMParallelCoordinates::renderLines()
 {
   //
   // Implement your line drawing
   //
   if(!_inport.hasData())
     return;
-  
+
   const Data& data = *(_inport.getData());
-  
+
   float maxIntensity = data[0].dataValues[0];
   float minIntensity = data[0].dataValues[0];
-  
+
   float maxAvg = data[0].dataValues[1];
   float minAvg = data[0].dataValues[1];
-  
+
   float maxStdDev = data[0].dataValues[2];
   float minStdDev = data[0].dataValues[2];
-  
+
   float maxGrad = data[0].dataValues[3];
   float minGrad = data[0].dataValues[3];
-  
+
   for(int i = 0; i < data.size(); i++)
   {
     const float intensityVal= data[i].dataValues[0];
     const float avgVal= data[i].dataValues[1];
     const float stdDevVal = data[i].dataValues[2];
     const float gradVal = data[i].dataValues[3];
-    
+
     if(intensityVal > maxIntensity)
       maxIntensity = intensityVal;
     if(intensityVal < minIntensity)
       minIntensity = intensityVal;
-    
+
     if(avgVal > maxAvg)
       maxAvg = avgVal;
     if(avgVal < minAvg)
       minAvg = avgVal;
-    
+
     if(stdDevVal > maxStdDev)
       maxStdDev = stdDevVal;
     if(stdDevVal < minStdDev)
@@ -235,51 +273,60 @@ void TNMParallelCoordinates::renderLines()
       maxGrad = gradVal;
     if(gradVal < minGrad)
       minGrad = gradVal;
-  
-    
   }
-    
+
+  glBegin(GL_LINES);
+  glColor3f(1,1,1);
+  glVertex2f(-0.33, -1);
+  glVertex2f(-0.33, 1);
+  glVertex2f(0.33, -1);
+  glVertex2f(0.33, 1);
+  glEnd();
+
   for(int i = 0; i < data.size(); i++)
   {
     const float intensityVal= data[i].dataValues[0];
     const float avgVal= data[i].dataValues[1];
     const float stdDevVal = data[i].dataValues[2];
     const float gradVal = data[i].dataValues[3];
-   
+
     //(värde-min)/(max-min)
-    
+
     float intNorm = -1+(intensityVal-minIntensity)*2/(maxIntensity-minIntensity);
     float avgNorm = -1+(avgVal-minAvg)*2/(maxAvg-minAvg);
     float stdDevNorm = -1+(stdDevVal-minStdDev)*2/(maxStdDev-minStdDev);
     float gradNorm = -1+(gradVal-minGrad)*2/(maxGrad-minGrad);
-    
-    
+
+    if( intNorm > _handles.at(0)._position.y ||
+        intNorm < _handles.at(1)._position.y ||
+        avgNorm > _handles.at(2)._position.y ||
+        avgNorm < _handles.at(3)._position.y ||
+        stdDevNorm > _handles.at(4)._position.y ||
+        stdDevNorm < _handles.at(5)._position.y ||
+        gradNorm > _handles.at(6)._position.y ||
+        gradNorm < _handles.at(7)._position.y )
+        continue;
+
     glBegin(GL_LINES);
-    glColor3f(1,1,1);
-    glVertex2f(-0.33, -1);
-    glVertex2f(-0.33, 1);
-    glVertex2f(0.33, -1);
-    glVertex2f(0.33, 1);
-    
     glColor3f(0,1,0);
     glVertex2f(-1, intNorm);
     glVertex2f(-0.33, avgNorm);
-    
+
     glVertex2f(-0.33, avgNorm);
     glVertex2f(0.33, stdDevNorm);
-    
+
     glVertex2f(0.33, stdDevNorm);
     glVertex2f(1, gradNorm);
     glEnd();
-         
+
   }
-  
+
   //0, intensity
   //1, avg
   //2, stddev
   //3, gradient mag
-  
-  
+
+
 }
 
 void TNMParallelCoordinates::renderLinesPicking() {
