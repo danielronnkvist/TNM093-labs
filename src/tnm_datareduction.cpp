@@ -34,10 +34,19 @@ void TNMDataReduction::process() {
 
 	// Our new data
 	Data* outportData = new Data;
+	int x;
+	if(percentage != 0)
+	  x = 100/(100*percentage);
+	else
+	  x = 0;
     for (size_t i = 0; i < inportData.size(); ++i) {
         const VoxelDataItem& item = inportData[i];
 
         // Filter the 'inportData' based on the percentage and add it to 'outportData'
+	if( x == i%100 )
+	{
+	  outportData->push_back(item);
+	}
 
     }
 
