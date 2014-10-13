@@ -139,7 +139,7 @@ void TNMParallelCoordinates::handleMouseClick(tgt::MouseEvent* e) {
 	// The picking information for the handles is stored in the red color channel
     int handleId = static_cast<int>(pickingTexture->texelAsFloat(screenCoords).r * 255 - 1);
 
-    LINFOC("Picking", "Picked handle index: " << handleId);
+//     LINFOC("Picking", "Picked handle index: " << handleId);
     // Use the 'id' and the 'normalizedDeviceCoordinates' to move the correct handle
     // The id is the id of the AxisHandle that has been clicked (the same id you assigned in the constructor)
     // id == -1 if no handle was clicked
@@ -159,7 +159,7 @@ void TNMParallelCoordinates::handleMouseClick(tgt::MouseEvent* e) {
 
 
 
-    LINFOC("Picking", "Picked line index: " << lineId);
+//     LINFOC("Picking", "Picked line index: " << lineId);
     if (lineId != -1)
 	    // We want to add it only if a line was clicked
 	    _linkingList.insert(lineId);
@@ -208,12 +208,11 @@ void TNMParallelCoordinates::handleMouseMove(tgt::MouseEvent* e) {
                 newPosition.y = normalizedDeviceCoordinates.y;
             }
         }
-        LINFOC("drag", "Dragging " << _pickedHandle << " with pair " << handlePair);
+//         LINFOC("drag", "Dragging " << _pickedHandle << " with pair " << handlePair);
         _handles.at(_pickedHandle).setPosition(newPosition);
     }
 
 	// update the _brushingList with the indices of the lines that are not rendered anymore
-
 
 	_brushingIndices.set(_brushingList);
 
@@ -305,8 +304,12 @@ void TNMParallelCoordinates::renderLines()
         stdDevNorm < _handles.at(5)._position.y ||
         gradNorm > _handles.at(6)._position.y ||
         gradNorm < _handles.at(7)._position.y )
-        continue;
-
+    {
+      _brushingList.insert(data[i].voxelIndex);
+      continue;
+    }
+        
+    _brushingList.erase(data[i].voxelIndex);
     glBegin(GL_LINES);
     glColor3f(0,1,0);
     glVertex2f(-1, intNorm);
