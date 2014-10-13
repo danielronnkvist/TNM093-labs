@@ -7,7 +7,6 @@ namespace {
 	bool sortByIndex(const VoxelDataItem& lhs, const VoxelDataItem& rhs) {
 		return lhs.voxelIndex < rhs.voxelIndex;
 	}
-
 }
 
 TNMDataReduction::TNMDataReduction()
@@ -21,7 +20,8 @@ TNMDataReduction::TNMDataReduction()
 }
 
 Processor* TNMDataReduction::create() const {
-    return new TNMDataReduction;
+  return new TNMDataReduction;
+    
 }
 
 void TNMDataReduction::process() {
@@ -32,27 +32,17 @@ void TNMDataReduction::process() {
     const Data& inportData = *(_inport.getData());
     const float percentage = _percentage.get();
 
-	// Our new data
-	Data* outportData = new Data;
-	int x;
-	if(percentage != 0)
-	  x = 100/(100*percentage);
-	else
-	  x = 0;
-    for (size_t i = 0; i < inportData.size(); ++i) {
-        const VoxelDataItem& item = inportData[i];
+    // Our new data
+    Data* outportData = new Data;
+    int x = (inportData.size()*percentage);
 
-        // Filter the 'inportData' based on the percentage and add it to 'outportData'
-	if( x == i%100 )
-	{
-	  outportData->push_back(item);
-	}
+    outportData->assign(inportData.begin(),inportData.end());
+    std::random_shuffle ( outportData->begin(), outportData->end());
+    outportData->erase(outportData->begin(),outportData->begin()+x);
 
-    }
-
-	// sort the data by the voxel index for faster processing later
-	std::sort(outportData->begin(), outportData->end(), sortByIndex);
-	// Place the new data into the outport (and transferring ownership at the same time)
+    // sort the data by the voxel index for faster processing later
+    std::sort(outportData->begin(), outportData->end(), sortByIndex);
+    // Place the new data into the outport (and transferring ownership at the same time)
     _outport.setData(outportData);
 }
 
