@@ -38,7 +38,7 @@
                 <Processor type="Canvas" name="Canvas" id="ref1">
                     <MetaData>
                         <MetaItem name="ProcessorGraphicsItem" type="PositionMetaData" x="-150" y="261" />
-                        <MetaItem name="ProcessorWidget" type="WindowStateMetaData" visible="false" x="113" y="281" width="536" height="525" />
+                        <MetaItem name="ProcessorWidget" type="WindowStateMetaData" visible="true" x="115" y="284" width="536" height="525" />
                     </MetaData>
                     <Properties>
                         <Property name="canvasSize">
@@ -58,6 +58,7 @@
                         <Property name="mouse.click" lod="1" enabled="true" mouseAction="6" mouseButtons="1" keyCode="0" modifier="0" shareEvents="false" />
                         <Property name="mouse.move" lod="1" enabled="true" mouseAction="1" mouseButtons="1" keyCode="0" modifier="0" shareEvents="false" />
                         <Property name="mouse.release" lod="1" enabled="true" mouseAction="4" mouseButtons="1" keyCode="0" modifier="0" shareEvents="false" />
+                        <Property name="mouse.rightclick" lod="1" enabled="true" mouseAction="6" mouseButtons="4" keyCode="0" modifier="0" shareEvents="false" />
                     </Properties>
                     <InteractionHandlers />
                 </Processor>
@@ -69,7 +70,7 @@
                         <Property name="brushingIndices" id="ref46" />
                         <Property name="firstAxis" value="0" />
                         <Property name="linkingIndices" id="ref44" />
-                        <Property name="secondAxis" value="0" />
+                        <Property name="secondAxis" value="1" />
                     </Properties>
                     <InteractionHandlers />
                 </Processor>
@@ -152,7 +153,7 @@
                         <Property name="gridColor">
                             <value x="1" y="1" z="1" w="1" />
                         </Property>
-                        <Property name="maximizeOnDoubleClick" value="true" />
+                        <Property name="maximizeOnDoubleClick" value="false" />
                         <Property name="maximized" value="0" />
                         <Property name="mouseEvent.maximize" lod="1" enabled="true" mouseAction="8" mouseButtons="1" keyCode="0" modifier="0" shareEvents="false" />
                         <Property name="mouseEvent.move" lod="1" enabled="true" mouseAction="103" mouseButtons="0" keyCode="0" modifier="0" shareEvents="false" />
@@ -174,7 +175,7 @@
                         <Property name="mouseEvent.cursorPositionMove" lod="1" enabled="true" mouseAction="1" mouseButtons="0" keyCode="0" modifier="0" shareEvents="true" />
                         <Property name="mouseEvent.cursorPositionPress" lod="1" enabled="true" mouseAction="19" mouseButtons="3" keyCode="0" modifier="0" shareEvents="true" />
                         <Property name="mousePositionProperty">
-                            <value x="-1" y="-1" z="-1" />
+                            <value x="0.08238626" y="-0.40140587" z="-0.10526317" />
                         </Property>
                         <Property name="numSlicesPerCol" value="1" />
                         <Property name="numSlicesPerRow" value="1" />
@@ -295,7 +296,7 @@
                         <MetaItem name="ProcessorGraphicsItem" type="PositionMetaData" x="-218" y="-203" />
                     </MetaData>
                     <Properties>
-                        <Property name="percentage" value="0" />
+                        <Property name="percentage" value="0.99000001" />
                     </Properties>
                     <InteractionHandlers />
                 </Processor>

@@ -26,7 +26,7 @@ protected:
     void process();
 
 	// Render the lines for the parallel coordinates plot
-    void renderLines();
+    void renderLines(bool picking = false);
 
 	// Render the lines with picking information included in the color
 	void renderLinesPicking();
@@ -46,7 +46,8 @@ protected:
 
 	// The callback method that gets called when the mouse button is released
     void handleMouseRelease(tgt::MouseEvent* e);
-
+  
+    void renderAxisLines();
     // This class stores and renders a single handle
     // it provides access to the index for picking
     class AxisHandle {

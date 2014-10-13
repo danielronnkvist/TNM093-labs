@@ -66,7 +66,11 @@ TNMParallelCoordinates::TNMParallelCoordinates()
         this, &TNMParallelCoordinates::handleMouseClick,
         tgt::MouseEvent::MOUSE_BUTTON_LEFT, tgt::MouseEvent::CLICK, tgt::Event::MODIFIER_NONE);
     addEventProperty(_mouseClickEvent);
-
+ _mouseClickEvent = new EventProperty<TNMParallelCoordinates>(
+        "mouse.rightclick", "Mouse Click",
+        this, &TNMParallelCoordinates::handleMouseClick,
+        tgt::MouseEvent::MOUSE_BUTTON_RIGHT, tgt::MouseEvent::CLICK, tgt::Event::MODIFIER_NONE);
+    addEventProperty(_mouseClickEvent);
     _mouseMoveEvent = new EventProperty<TNMParallelCoordinates>(
         "mouse.move", "Mouse Move",
         this, &TNMParallelCoordinates::handleMouseMove,
@@ -108,7 +112,9 @@ void TNMParallelCoordinates::process() {
 	// Render the handles
     renderHandles();
 	// Render the parallel coordinates lines
+    renderAxisLines();
     renderLines();
+    
 
 	// We are done with the visual part
     _outport.deactivateTarget();
@@ -118,7 +124,7 @@ void TNMParallelCoordinates::process() {
 	// Clear that buffer as well
     _privatePort.clearTarget();
 	// Render the handles with the picking information encoded in the red channel
-    renderHandlesPicking();
+	renderHandlesPicking();
 	// Render the lines with the picking information encoded in the green/blue/alpha channel
 	renderLinesPicking();
 	// We are done with the private render target
@@ -154,19 +160,29 @@ void TNMParallelCoordinates::handleMouseClick(tgt::MouseEvent* e) {
     }
 
     int lineId = -1;
+    const Data& data = *(_inport.getData());
     // Derive the id of the line that was clicked based on the color scheme that you devised in the
     // renderLinesPicking method
-
-
-
-//     LINFOC("Picking", "Picked line index: " << lineId);
+    //(0,voxelIndex%255,(voxelIndex+(255/3))%255,(voxelIndex+(2*255/3))%255);
+    lineId = static_cast<int>( pickingTexture->texelAsFloat(screenCoords).g * (data.size()*255) - 1);
+    
+    LINFOC("Picking", "Picked line index: " << lineId);
+   
     if (lineId != -1)
-	    // We want to add it only if a line was clicked
-	    _linkingList.insert(lineId);
-
+    {
+      // We want to add it only if a line was clicked
+      _linkingList.insert(lineId);
+      LINFOC("insert", "done");
+      
+    }
+    
     // if the right mouse button is pressed and no line is clicked, clear the list:
-    if ((e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT) && (lineId == -1))
-	    _linkingList.clear();
+    if ((e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT))
+    {
+      LINFOC("Picking", "Clearing");
+      _linkingList.clear();
+    }
+	    
 
     // Make the list of selected indices available to the Scatterplot
     _linkingIndices.set(_linkingList);
@@ -224,14 +240,27 @@ void TNMParallelCoordinates::handleMouseRelease(tgt::MouseEvent* e) {
     _pickedHandle = -1;
 }
 
-void TNMParallelCoordinates::renderLines()
+void TNMParallelCoordinates::renderAxisLines()
 {
+  glBegin(GL_LINES);
+  glColor3f(1,1,1);
+  glVertex2f(-0.33, -1);
+  glVertex2f(-0.33, 1);
+  glVertex2f(0.33, -1);
+  glVertex2f(0.33, 1);
+  glEnd();
+}
+
+
+void TNMParallelCoordinates::renderLines(bool picking)
+{
+  LINFOC("draw" , "drawing");
   //
   // Implement your line drawing
   //
   if(!_inport.hasData())
     return;
-
+  
   const Data& data = *(_inport.getData());
 
   float maxIntensity = data[0].dataValues[0];
@@ -274,14 +303,6 @@ void TNMParallelCoordinates::renderLines()
       minGrad = gradVal;
   }
 
-  glBegin(GL_LINES);
-  glColor3f(1,1,1);
-  glVertex2f(-0.33, -1);
-  glVertex2f(-0.33, 1);
-  glVertex2f(0.33, -1);
-  glVertex2f(0.33, 1);
-  glEnd();
-
   for(int i = 0; i < data.size(); i++)
   {
     const float intensityVal= data[i].dataValues[0];
@@ -295,7 +316,10 @@ void TNMParallelCoordinates::renderLines()
     float avgNorm = -1+(avgVal-minAvg)*2/(maxAvg-minAvg);
     float stdDevNorm = -1+(stdDevVal-minStdDev)*2/(maxStdDev-minStdDev);
     float gradNorm = -1+(gradVal-minGrad)*2/(maxGrad-minGrad);
-
+    if(intNorm > 1 || intNorm < -1)
+    {
+      LINFOC("int", intNorm);
+    }
     if( intNorm > _handles.at(0)._position.y ||
         intNorm < _handles.at(1)._position.y ||
         avgNorm > _handles.at(2)._position.y ||
@@ -311,7 +335,25 @@ void TNMParallelCoordinates::renderLines()
         
     _brushingList.erase(data[i].voxelIndex);
     glBegin(GL_LINES);
-    glColor3f(0,1,0);
+    
+    if(picking)
+    {
+      int voxelIndex = i;
+      glColor3f( 0, (voxelIndex+1)/(data.size()*255.f), 0);
+    }
+    else
+    {
+      if(_linkingList.find(i) != _linkingList.end())
+      {
+	glColor3f(1,0,0);
+      }
+      else
+      {
+	glColor3f(0,1,0);
+      }
+      
+    }
+    
     glVertex2f(-1, intNorm);
     glVertex2f(-0.33, avgNorm);
 
@@ -336,6 +378,7 @@ void TNMParallelCoordinates::renderLinesPicking() {
 	// Use the same code to render lines (without duplicating it), but think of a way to encode the
 	// voxel identifier into the color. The red color channel is already occupied, so you have 3
 	// channels with 32-bit each at your disposal (green, blue, alpha)
+	renderLines(true);
 
 }
 

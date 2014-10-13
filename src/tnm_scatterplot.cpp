@@ -123,6 +123,7 @@ void TNMScatterPlot::process() {
 		++i) 
 	{
 		const unsigned int thisIndex = *i;
+		LINFOC("scatterlinking", "adding: " << thisIndex);
 		selectionData[thisIndex] = 1;
 	}
 
