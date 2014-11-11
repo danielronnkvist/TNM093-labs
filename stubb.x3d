@@ -19,8 +19,14 @@ and load libraries commonly used in the VR laboratory.
     <MetadataString
         name="library" value="vhtk" containerField="references"/>
   </PythonScript>
+  <!--<Viewpoint position="0 0 1" fieldOfView="0.5"/>
+  <SMViewpoint position="-.04 0 1" screenLowerLeft="-0.35 -0.24 0" screenUpperRight="0.35 0.24 0"/>
+  <SMViewpoint position="0.04 0 1" screenLowerLeft="-0.35 -0.24 0" screenUpperRight="0.35 0.24 0"/>-->
   
   <Viewpoint position="1 0.1 1" orientation="0 1 0 0.8" fieldOfView="0.5"/>
+  <SMViewpoint position="1.02 0.1 0.98" orientation="0 1 0 1.57" screenLowerLeft="0 -.09 .6" screenUpperRight=".6 .29 0"/>
+  <SMViewpoint position="0.98 0.1 1.02" orientation="0 1 0 1.57" screenLowerLeft="0 -.09 .6" screenUpperRight=".6 .29 0"/>
+  
   
   <Transform scale="0.4 0.4 0.4" rotation= "0.257 -0.950 -0.181 0.175">
     <Group DEF="CHAIR">
