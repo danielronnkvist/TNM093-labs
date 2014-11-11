@@ -20,7 +20,7 @@ and load libraries commonly used in the VR laboratory.
         name="library" value="vhtk" containerField="references"/>
   </PythonScript>
   
-  
+  <Viewpoint position="1 0.1 1" orientation="0 1 0 0.8" fieldOfView="0.5"/>
   
   <Transform scale="0.4 0.4 0.4" rotation= "0.257 -0.950 -0.181 0.175">
     <Group DEF="CHAIR">
