@@ -21,7 +21,65 @@ and load libraries commonly used in the VR laboratory.
   </PythonScript>
   
   
-  <!-- Put your code here -->
   
-  
-</Group>
+  <Transform scale="0.4 0.4 0.4" rotation= "0.257 -0.950 -0.181 0.175">
+    <Group DEF="CHAIR">
+      <Shape DEF="BASE">
+	<Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	<Box size="0.4 0.05 0.4"/>
+      </Shape>
+      <Transform translation="0 0.15 -0.175">
+	<Shape DEF="backVertical">
+	  <Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	  <Box size="0.04 0.3 0.04"/>
+	</Shape>
+	<Transform translation="-0.18 0 0">  
+	  <Shape USE="backVertical" />
+	</Transform>
+	<Transform translation="0.18 0 0">  
+	  <Shape USE="backVertical" />
+	</Transform>
+	<Transform translation="0.09 0 0">  
+	  <Shape USE="backVertical" />
+	</Transform>
+	<Transform translation="-0.09 0 0">  
+	  <Shape USE="backVertical" />
+	</Transform>
+	<Transform translation="0 0.17 0">
+	  <Shape DEF="backHorizontal">
+	    <Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	    <Box size="0.4 0.04 0.04" />
+	  </Shape>
+	</Transform>
+      </Transform>
+      <!-- Legs      -->
+      <Transform translation="0 -0.15 0">
+	<Transform translation="0.175 0 0.175">
+	  <Shape DEF="LEG">
+	    <Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	    <Box size="0.05 0.3 0.05"/>
+	  </Shape>
+	</Transform>
+	<Transform translation="0.175 0 -0.175">
+	  <Shape USE="LEG" />
+	</Transform>
+	<Transform translation="-0.175 0 0.175">
+	  <Shape USE="LEG" />
+	</Transform>
+	<Transform translation="-0.175 0 -0.175">
+	  <Shape USE="LEG" />
+	</Transform>
+      </Transform>    
+    </Group>
+  </Transform>
+
+    <Transform scale="0.4 0.4 0.4" translation="0.2 0 0.1" rotation= "0.257 -0.950 -0.181 1.175">
+    <Group USE="CHAIR" />
+    </Transform>
+    
+    <Transform scale="0.4 0.4 0.4" translation="-0.2 0 -0.1" rotation= "0 0.9396926207859083 0 -0.642">
+    <Group USE="CHAIR" />
+    </Transform>
+    
+    
+  </Group>
