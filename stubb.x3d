@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright 2013, Karljohan Lundin Palmerius
+
+This is a stubb for laborations on multi-modal display
+systems in the VR laboratory. It will disable the X3D
+navigation to allow for viewpoint calibration and tracking,
+and load libraries commonly used in the VR laboratory.
+
+-->
+<Group>
+  
+  <PythonScript url="urn:candy:python/CorrectViewpoint.py"/>
+  
+  <PythonScript url="urn:candy:python/AutoLoadSO.py"/>
+  
+  <PythonScript url="urn:candy:python/AutoLoadSO.py">
+    <MetadataString
+        name="library" value="vhtk" containerField="references"/>
+  </PythonScript>
+  
+  
+  <!-- Put your code here -->
+  
+  
+</Group>
