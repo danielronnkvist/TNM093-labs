@@ -19,6 +19,10 @@ and load libraries commonly used in the VR laboratory.
     <MetadataString
         name="library" value="vhtk" containerField="references"/>
   </PythonScript>
+  
+  <PythonScript DEF="MFtoSF1" url="urn:candy:python/MFtoSFBool.py"/>
+  <PythonScript DEF="MFtoSF2" url="urn:candy:python/MFtoSFBool.py"/>
+  
   <Viewpoint position="0 0 1" fieldOfView="0.5"/>
   <SMViewpoint position="0 0 1" screenLowerLeft="-.960 -.540 0" screenUpperRight=".960 .540 0"/>
   <SMViewpoint position="0.1 0 .9" screenLowerLeft="-.960 -.540 0" screenUpperRight=".960 .540 0"/>
@@ -31,16 +35,26 @@ and load libraries commonly used in the VR laboratory.
   <SMViewpoint position="1.02 0.1 0.98" orientation="0 1 0 1.57" screenLowerLeft="0 -.09 .6" screenUpperRight=".6 .29 0"/>
   <SMViewpoint position="0.98 0.1 1.02" orientation="0 1 0 1.57" screenLowerLeft="0 -.09 .6" screenUpperRight=".6 .29 0"/>
   
+  <VRSound location="0 0 0" spatialize="true">
+    <EchoSoundEffect delay="5" spread="5" />
+    <AudioClip DEF="SNAP" url="fine.wav" startTime="0"/>
+  </VRSound>
+  <TimeTrigger DEF="TIT1" set_boolean="" />
+  
+  <VRSound location="0 0 0" spatialize="true">
+    <AudioClip DEF="LOL" url="fin2.wav" startTime="0"/>
+  </VRSound>
+  <TimeTrigger DEF="TIT2" set_boolean="" />
   
   <Transform scale="0.4 0.4 0.4" rotation= "0.257 -0.950 -0.181 0.175">
     <Group DEF="CHAIR">
       <Shape DEF="BASE">
-	<Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
-	<Box size="0.4 0.05 0.4"/>
+	<Appearance><FrictionalSurface stiffness="500" damping="2" useRelativeValues="false" /><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	<Box DEF="BASE_BOX" size="0.4 0.05 0.4" isTouched=""/>
       </Shape>
       <Transform translation="0 0.15 -0.175">
 	<Shape DEF="backVertical">
-	  <Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	  <Appearance><FrictionalSurface stiffness="500" damping="2" useRelativeValues="false"/><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
 	  <Box size="0.04 0.3 0.04"/>
 	</Shape>
 	<Transform translation="-0.18 0 0">  
@@ -57,7 +71,7 @@ and load libraries commonly used in the VR laboratory.
 	</Transform>
 	<Transform translation="0 0.17 0">
 	  <Shape DEF="backHorizontal">
-	    <Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	    <Appearance><FrictionalSurface stiffness="400" damping="2" useRelativeValues="false"/><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
 	    <Box size="0.4 0.04 0.04" />
 	  </Shape>
 	</Transform>
@@ -66,8 +80,8 @@ and load libraries commonly used in the VR laboratory.
       <Transform translation="0 -0.15 0">
 	<Transform translation="0.175 0 0.175">
 	  <Shape DEF="LEG">
-	    <Appearance><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
-	    <Box size="0.05 0.3 0.05"/>
+	    <Appearance><FrictionalSurface stiffness="100" damping="2" useRelativeValues="false"/><Material diffuseColor="0.61 0.34 0.067"/></Appearance>
+	    <Box DEF="LEG_BOX" size="0.05 0.3 0.05" isTouched=""/>
 	  </Shape>
 	</Transform>
 	<Transform translation="0.175 0 -0.175">
@@ -91,5 +105,12 @@ and load libraries commonly used in the VR laboratory.
     <Group USE="CHAIR" />
     </Transform>
     
+    <ROUTE fromNode="BASE_BOX" fromField="isTouched" toNode="MFtoSF1" toField="value" />
+    <ROUTE fromNode="MFtoSF1" fromField="value" toNode="TIT1" toField="set_boolean" />
+    <ROUTE fromNode="TIT1" fromField="triggerTime" toNode="SNAP" toField="startTime" />
+    
+    <ROUTE fromNode="LEG_BOX" fromField="isTouched" toNode="MFtoSF2" toField="value" />
+    <ROUTE fromNode="MFtoSF2" fromField="value" toNode="TIT2" toField="set_boolean" />
+    <ROUTE fromNode="TIT2" fromField="triggerTime" toNode="LOL" toField="startTime" />
     
   </Group>
