@@ -2,7 +2,7 @@
 # SGCT Project Authors see Authors.txt
 
 cmake_minimum_required(VERSION 2.8)
-SET(APP_NAME stubb)
+SET(APP_NAME trackingExample)
 
 SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
 SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
@@ -10,45 +10,27 @@ SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windo
 PROJECT(${APP_NAME})
 
 add_executable(${APP_NAME}
-	stubb.cpp)
+	main.cpp)
 	
-option(SGCT_PLACE_TARGETS_IN_SOURCE_TREE "Place targets in source tree" OFF)
-if( SGCT_PLACE_TARGETS_IN_SOURCE_TREE )
-	set(EXAMPE_TARGET_PATH ${PROJECT_SOURCE_DIR})
-else()
-	set(EXAMPE_TARGET_PATH ${PROJECT_BINARY_DIR}) 
-endif()
-
+set(EXAMPE_TARGET_PATH ${PROJECT_SOURCE_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${EXAMPE_TARGET_PATH})
 	
 set_target_properties(${APP_NAME} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${EXAMPE_TARGET_PATH}
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${EXAMPE_TARGET_PATH}
-)
-
-#copy data
-if( NOT SGCT_PLACE_TARGETS_IN_SOURCE_TREE )
-	add_custom_command(TARGET ${APP_NAME}
-		PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR} ${EXAMPE_TARGET_PATH})
-endif()	
+)	
 	
 if( APPLE  )
-	option(SGCT_CPP11 "Use c++11" OFF)
-	mark_as_advanced(SGCT_CPP11)
 	set(CMAKE_OSX_ARCHITECTURES "x86_64")
-		if(CMAKE_GENERATOR STREQUAL Xcode)
-	set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8")
-endif()
+	if(CMAKE_GENERATOR STREQUAL Xcode)
+		set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+	endif()
 endif()
 	
 find_library(SGCT_RELEASE_LIBRARY
-	NAMES sgct libsgct libsgct_cpp11
-	REQUIRED)
-	
+	NAMES sgct libsgct REQUIRED)
 find_library(SGCT_DEBUG_LIBRARY 
-	NAMES sgctd libsgctd libsgct_cpp11d
-	REQUIRED)
+	NAMES sgctd libsgctd REQUIRED)
 
 if( WIN32 )
 	find_path(SGCT_INCLUDE_DIRECTORY 
@@ -87,35 +69,37 @@ elseif( WIN32 ) #MINGW or similar
 elseif( APPLE )
 	find_library(COCOA_LIBRARY Cocoa REQUIRED)
 	find_library(IOKIT_LIBRARY IOKit REQUIRED)
+	find_library(COREVIDEO_LIBRARY CoreVideo REQUIRED)
 
 	set(LIBS
 		${SGCT_LIBS}
 		${OPENGL_LIBRARY}
 		${COCOA_LIBRARY}
 		${IOKIT_LIBRARY}
+		${COREVIDEO_LIBRARY}
 	)
 else() #linux
-  find_library(X11_LIBRARY X11 REQUIRED)
-  find_library(XRANDR_LIBRARY Xrandr REQUIRED)
-  find_library(XI_LIBRARY Xi REQUIRED)
-  find_library(XXF86VM_LIBRARY Xxf86vm REQUIRED)
-  find_library(PTHREAD pthread REQUIRED)
-  
-  set(LIBS
-    ${SGCT_LIBS}
-    ${OPENGL_LIBRARY}
-    ${X11_LIBRARY}
-    ${XRANDR_LIBRARY}
-    ${XI_LIBRARY}
-    ${XXF86VM_LIBRARY}
-    ${PTHREAD}
-  )
+	find_library(X11_LIBRARY X11 REQUIRED)
+	find_library(XRANDR_LIBRARY Xrandr REQUIRED)
+	find_library(XI_LIBRARY Xi REQUIRED)
+	find_library(XXF86VM_LIBRARY Xxf86vm)
+	find_library(PTHREAD pthread REQUIRED)
+
+	set(LIBS
+		${SGCT_LIBS}
+		${OPENGL_LIBRARY}
+		${X11_LIBRARY}
+		${XRANDR_LIBRARY}
+		${XI_LIBRARY}
+		${XXF86VM_LIBRARY}
+		${PTHREAD}
+	)
 endif()
 
 if( MSVC )
 	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
 	
-	if( "${MSVC_VERSION}" LESS 1600 ) #less than visual studio 2010
+		if( "${MSVC_VERSION}" LESS 1600 ) #less than visual studio 2010
 		STRING(REPLACE "INCREMENTAL:YES" "INCREMENTAL:NO" replacementFlags
 			${CMAKE_EXE_LINKER_FLAGS_DEBUG})
 		SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${replacementFlags}" )
@@ -142,16 +126,15 @@ endif()
 
 if( WIN32 )
 	add_definitions(-D__WIN32__)
+	if( MINGW )
+		set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+	endif()
 elseif( APPLE  )
 	add_definitions(-D__APPLE__)
-	if( SGCT_CPP11 )
-    	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
-		add_definitions(-D__SGCT_CPP11__)
-	else()
-		set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libstdc++ ${CMAKE_CXX_FLAGS}")
-	endif()
+	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libstdc++ ${CMAKE_CXX_FLAGS}")
 else()
 	add_definitions(-D__LINUX__)
+	set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 endif()
 	
 if( CMAKE_COMPILER_IS_GNUCXX )
