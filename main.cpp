@@ -16,7 +16,7 @@ void myDecodeFun();
 
 void drawAxes(float size);
 void drawWireCube(float size);
-
+int calculateIntersection(sgct::SGCTTrackingDevice *wand);
 //-----------------------
 // variable declarations 
 //-----------------------
@@ -25,7 +25,11 @@ void drawWireCube(float size);
 sgct::SharedVector<glm::mat4> sharedTransforms;
 sgct::SharedString sharedText;
 sgct::SharedObject<size_t> sharedHeadSensorIndex(0);
+sgct::SharedVector<bool> sharedSelect;
+sgct::SharedBool sharedbuttonPressed;
 
+glm::vec3 trackPos;
+glm::vec3 trackrot;
 //pointer to a device
 sgct::SGCTTrackingDevice * devicePtr = NULL;
 //pointer to a tracker
@@ -64,6 +68,11 @@ int main( int argc, char* argv[] )
 void myInitOGLFun()
 {
 	glEnable(GL_DEPTH_TEST);
+
+	for (int i = 0; i < 37; i++)
+	{
+		sharedSelect.addVal(false);
+	}
 
 	//only store the tracking data on the master node
 	if( gEngine->isMaster() )
@@ -115,7 +124,6 @@ void myPreSyncFun()
 	{
 		size_t index = 0;
 		std::stringstream ss;
-		
 		/*
 			Loop trough all trackers (like intersense IS-900, Microsoft Kinect, PhaseSpace etc.)
 		*/
@@ -161,6 +169,21 @@ void myPreSyncFun()
 					{
 						ss << "          Button " << k << ": " << (devicePtr->getButton(k) ? "pressed" : "released") << "\n";
 					}
+
+					bool pressed = devicePtr->getButton(5);
+					sharedbuttonPressed.setVal(pressed);
+					if (pressed)
+					{
+						int cubeIndex = calculateIntersection(devicePtr);
+						sharedSelect.setValAt(cubeIndex, !sharedSelect.getValAt(cubeIndex));
+						trackPos = devicePtr->getPosition();
+						trackrot = devicePtr->getEulerAngles();
+						//sharedSelect.setValAt(15, !sharedSelect.getValAt(15));
+						//sharedSelect.setValAt(7, !sharedSelect.getValAt(7));
+						//sharedSelect.setValAt(20, !sharedSelect.getValAt(20));
+						//sharedSelect.setValAt(8, !sharedSelect.getValAt(8));
+					}
+
 				}
 
 				if( devicePtr->hasAnalogs() )
@@ -188,13 +211,19 @@ void myPreSyncFun()
 */
 void myDrawFun()
 {
+	int cube = 0;
 	//draw some yellow cubes in space
 	for( float i=-0.5f; i<=0.5f; i+=0.2f)
 		for(float j=-0.5f; j<=0.5f; j+=0.2f)
 		{
+			cube++;
 			glPushMatrix();
 			glTranslatef(i, j, 0.0f);
-			glColor3f(1.0f,1.0f,0.0f);
+			glTranslatef(0, 0, 0.1f*sin(gEngine->getTime() + j + i));
+			if (sharedSelect.getValAt(cube))
+				glColor3f(1.0f, 1.0f, 1.0f);
+			else
+				glColor3f(1.0f,1.0f,0.0f);
 			drawWireCube(0.04f);
 			glPopMatrix();
 		}
@@ -217,7 +246,10 @@ void myDrawFun()
 
 			//draw pointer line
 			glBegin(GL_LINES);
-			glColor3f(1.0f,1.0f,0.0f);
+			if (sharedbuttonPressed.getVal())
+				glColor3f(1.0f, 0.0f, 0.0f);
+			else
+				glColor3f(1.0f,1.0f,0.0f);
 			glVertex3f(0.0f, 0.0f, 0.0f);
 			glVertex3f(0.0f, 0.0f, -5.0f);
 			glEnd();
@@ -239,15 +271,19 @@ void myDrawFun()
 void myEncodeFun()
 {
 	sgct::SharedData::instance()->writeVector( &sharedTransforms );
+	sgct::SharedData::instance()->writeVector(&sharedSelect);
 	sgct::SharedData::instance()->writeString( &sharedText );
-	sgct::SharedData::instance()->writeObj( &sharedHeadSensorIndex );
+	sgct::SharedData::instance()->writeObj(&sharedHeadSensorIndex);
+	sgct::SharedData::instance()->writeBool(&sharedbuttonPressed);
 }
 
 void myDecodeFun()
 {
 	sgct::SharedData::instance()->readVector( &sharedTransforms );
+	sgct::SharedData::instance()->readVector(&sharedSelect);
 	sgct::SharedData::instance()->readString( &sharedText );
-	sgct::SharedData::instance()->readObj( &sharedHeadSensorIndex );
+	sgct::SharedData::instance()->readObj(&sharedHeadSensorIndex);
+	sgct::SharedData::instance()->readBool(&sharedbuttonPressed);
 }
 
 void drawAxes(float size)
@@ -307,4 +343,30 @@ void drawWireCube(float size)
 	glVertex3f( -size, -size, size);
 	glVertex3f( -size, size, size);
 	glEnd();
+}
+
+int calculateIntersection(sgct::SGCTTrackingDevice *wand)
+{
+	glm::vec4 wandLine(0, 0, -50, 0);
+	glm::mat4 wandTransform = wand->getWorldTransform();
+	wandLine = wandTransform * wandLine;
+	glm::vec4 wandPos(wand->getPosition(), 0);
+	int cube = 0;
+	float cubeRadius = 0.04f;
+
+	for (float i = -0.5f; i <= 0.5f; i += 0.2f)
+	{
+		for (float j = -0.5f; j <= 0.5f; j += 0.2f)
+		{
+			glm::vec3 cubePos(i, j, 0);
+
+			
+
+
+			if (false)
+				return cube;
+			cube++;
+		}
+	}
+	return cube;
 }
