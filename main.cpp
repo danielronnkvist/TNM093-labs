@@ -2,9 +2,8 @@
 #include <sstream>
 
 sgct::Engine * gEngine;
-
 //-----------------------
-// function declarations 
+// function declarations
 //-----------------------
 void myInitOGLFun();
 void myPreSyncFun();
@@ -18,14 +17,14 @@ void drawAxes(float size);
 void drawWireCube(float size);
 int calculateIntersection(sgct::SGCTTrackingDevice *wand);
 //-----------------------
-// variable declarations 
+// variable declarations
 //-----------------------
 
 //store each device's transform 4x4 matrix in a shared vector
 sgct::SharedVector<glm::mat4> sharedTransforms;
 sgct::SharedString sharedText;
 sgct::SharedObject<size_t> sharedHeadSensorIndex(0);
-sgct::SharedVector<bool> sharedSelect;
+sgct::SharedVector<int> sharedSelect;
 sgct::SharedBool sharedbuttonPressed;
 
 glm::vec3 trackPos;
@@ -78,21 +77,21 @@ void myInitOGLFun()
 	if( gEngine->isMaster() )
 	{
 		size_t index = 0;
-		
+
 		//allocate shared data
 		for(size_t i = 0; i < sgct::Engine::getTrackingManager()->getNumberOfTrackers(); i++)
 		{
 			trackerPtr = sgct::Engine::getTrackingManager()->getTrackerPtr(i);
-			
+
 			//init the shared vector with identity matrixes
 			for(size_t j=0; j<trackerPtr->getNumberOfDevices(); j++)
 			{
 				devicePtr = trackerPtr->getDevicePtr(j);
-			
+
 				if( devicePtr->hasSensor() )
 				{
 					sharedTransforms.addVal( glm::mat4(1.0f) );
-					
+
 					//find the head sensor
 					if( sgct::Engine::getTrackingManager()->getHeadDevicePtr() == devicePtr )
 						sharedHeadSensorIndex.setVal(index);
@@ -130,17 +129,17 @@ void myPreSyncFun()
 		for(size_t i = 0; i < sgct::Engine::getTrackingManager()->getNumberOfTrackers(); i++)
 		{
 			trackerPtr = sgct::Engine::getTrackingManager()->getTrackerPtr(i);
-		
-			
+
+
 			/*
 				Loop trough all tracking devices (like headtracker, wand, stylus etc.)
 			*/
 			for(size_t j = 0; j < trackerPtr->getNumberOfDevices(); j++)
 			{
 				devicePtr = trackerPtr->getDevicePtr(j);
-				
+
 				ss << "Device " << i <<  "-" << j << ": " << devicePtr->getName() << "\n";
-				
+
 				if( devicePtr->hasSensor() )
 				{
 					sharedTransforms.setValAt( index, devicePtr->getWorldTransform() );
@@ -164,7 +163,7 @@ void myPreSyncFun()
 				if( devicePtr->hasButtons() )
 				{
 					ss << "\n     Buttons\n";
-					
+
 					for(size_t k=0; k < devicePtr->getNumberOfButtons(); k++)
 					{
 						ss << "          Button " << k << ": " << (devicePtr->getButton(k) ? "pressed" : "released") << "\n";
@@ -175,13 +174,18 @@ void myPreSyncFun()
 					if (pressed)
 					{
 						int cubeIndex = calculateIntersection(devicePtr);
-						sharedSelect.setValAt(cubeIndex, !sharedSelect.getValAt(cubeIndex));
-						trackPos = devicePtr->getPosition();
-						trackrot = devicePtr->getEulerAngles();
-						//sharedSelect.setValAt(15, !sharedSelect.getValAt(15));
-						//sharedSelect.setValAt(7, !sharedSelect.getValAt(7));
-						//sharedSelect.setValAt(20, !sharedSelect.getValAt(20));
-						//sharedSelect.setValAt(8, !sharedSelect.getValAt(8));
+
+						if(cubeIndex >= 0)
+						{
+							int value = sharedSelect.getValAt(cubeIndex);
+							if(value == 0)
+								value = 1;
+							else
+								value = 0;
+
+							sharedSelect.setValAt(cubeIndex, value);
+
+						}
 					}
 
 				}
@@ -189,7 +193,7 @@ void myPreSyncFun()
 				if( devicePtr->hasAnalogs() )
 				{
 					ss << "\n     Analog axes\n";
-					
+
 					for(size_t k=0; k < devicePtr->getNumberOfAxes(); k++)
 					{
 						ss << "          Axis " << k << ": " << devicePtr->getAnalog(k) << "\n";
@@ -199,7 +203,31 @@ void myPreSyncFun()
 				ss << "\n";
 			}
 		}
+		bool pressed = sgct::Engine::getKey(gEngine->getFocusedWindowIndex(),'1');
+		if (pressed != sharedbuttonPressed.getVal())
+		{
+			sharedbuttonPressed.setVal(pressed);
+			//int cubeIndex = calculateIntersection(devicePtr);
+			//sharedSelect.setValAt(cubeIndex, !sharedSelect.getValAt(cubeIndex));
+			//trackPos = devicePtr->getPosition();
+			//trackrot = devicePtr->getEulerAngles();
+			if(sharedbuttonPressed.getVal())
+			{
+				int cubeIndex = calculateIntersection(NULL);
 
+				if(cubeIndex >= 0)
+				{
+					int value = sharedSelect.getValAt(cubeIndex);
+					if(value == 0)
+						value = 1;
+					else
+						value = 0;
+
+					sharedSelect.setValAt(cubeIndex, value);
+
+				}
+			}
+		}
 		//store the string stream into the shared string
 		sharedText.setVal( ss.str() );
 	}
@@ -216,22 +244,22 @@ void myDrawFun()
 	for( float i=-0.5f; i<=0.5f; i+=0.2f)
 		for(float j=-0.5f; j<=0.5f; j+=0.2f)
 		{
-			cube++;
 			glPushMatrix();
 			glTranslatef(i, j, 0.0f);
-			glTranslatef(0, 0, 0.1f*sin(gEngine->getTime() + j + i));
+			//glTranslatef(0, 0, 0.1f*sin(gEngine->getTime() + j + i));
 			if (sharedSelect.getValAt(cube))
 				glColor3f(1.0f, 1.0f, 1.0f);
 			else
 				glColor3f(1.0f,1.0f,0.0f);
 			drawWireCube(0.04f);
 			glPopMatrix();
+			cube++;
 		}
 
 	//draw a cube and axes around each wand
 	for(size_t i = 0; i < sharedTransforms.getSize(); i++)
 	{
-		if(i != sharedHeadSensorIndex.getVal()) 
+		if(i != sharedHeadSensorIndex.getVal())
 		{
 			glLineWidth(2.0);
 
@@ -261,7 +289,7 @@ void myDrawFun()
 	//draw text
 	float textVerticalPos = static_cast<float>(gEngine->getActiveWindowPtr()->getYResolution()) - 100.0f;
 	int fontSize = 12;
-	
+
 	glColor3f(1.0f, 1.0f, 1.0f);
 	sgct_text::print(sgct_text::FontManager::instance()->getFont( "SGCTFont", fontSize ),
 		120.0f, textVerticalPos,
@@ -347,12 +375,26 @@ void drawWireCube(float size)
 
 int calculateIntersection(sgct::SGCTTrackingDevice *wand)
 {
-	glm::vec4 wandLine(0, 0, -50, 0);
-	glm::mat4 wandTransform = wand->getWorldTransform();
-	wandLine = wandTransform * wandLine;
-	glm::vec4 wandPos(wand->getPosition(), 0);
+
+	//wand position and start of line
+	glm::vec3 wandPos(0,0,3);
+	//end of our imaginary line
+	glm::vec3 wandLine(-0.5f, -0.3f, 0);
+
+	if(wand != NULL)
+	{
+		glm::vec4 line(0, 0, -10.0f, 0.0f);
+		glm::mat4 wandTransform = wand->getWorldTransform();
+		line = wandTransform * line;
+
+		wandLine.x  = line.x;
+		wandLine.y = line.y;
+		wandLine.z = line.z;
+		wandPos = wand->getPosition();
+	}
+
 	int cube = 0;
-	float cubeRadius = 0.04f;
+	float cubeRadius = 0.08f;
 
 	for (float i = -0.5f; i <= 0.5f; i += 0.2f)
 	{
@@ -360,13 +402,19 @@ int calculateIntersection(sgct::SGCTTrackingDevice *wand)
 		{
 			glm::vec3 cubePos(i, j, 0);
 
-			
+			//Calculate the distance from each cube to the line, if less than
+			//the picking radius of the cube, it gets selected
+			glm::vec3 cross = glm::cross((cubePos-wandPos),(cubePos-wandLine));
+			float distance = glm::length(cross)/glm::length(wandLine-wandPos);
 
-
-			if (false)
+			if (distance < cubeRadius)
+			{
+				sgct::MessageHandler::instance()->print("Cube: %i Distance: %f\n", cube, distance);
+				sgct::MessageHandler::instance()->print("X: %f Y: %f\n", i, j);
 				return cube;
+			}
 			cube++;
 		}
 	}
-	return cube;
+	return -1;
 }
