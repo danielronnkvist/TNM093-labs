@@ -23,6 +23,9 @@ and load libraries commonly used in the VR laboratory.
   <PythonScript DEF="MFtoSF1" url="urn:candy:python/MFtoSFBool.py"/>
   <PythonScript DEF="MFtoSF2" url="urn:candy:python/MFtoSFBool.py"/>
   
+  <BooleanFilter DEF="baseBoolFilt" />
+  <BooleanFilter DEF="legBoolFilt" />
+  
   <Viewpoint position="0 0 1" fieldOfView="0.5"/>
   <SMViewpoint position="0 0 1" screenLowerLeft="-.960 -.540 0" screenUpperRight=".960 .540 0"/>
   <SMViewpoint position="0.1 0 .9" screenLowerLeft="-.960 -.540 0" screenUpperRight=".960 .540 0"/>
@@ -106,7 +109,8 @@ and load libraries commonly used in the VR laboratory.
     </Transform>
     
     <ROUTE fromNode="BASE_BOX" fromField="isTouched" toNode="MFtoSF1" toField="value" />
-    <ROUTE fromNode="MFtoSF1" fromField="value" toNode="TIT1" toField="set_boolean" />
+    <ROUTE fromNode="MFtoSF1" fromField="value" toNode="baseBoolFilt" toField="set_boolean" />
+    <ROUT fromNode="baseBoolFilt" fromField="inputTrue" toNode="TIT1" toField="set_boolean">
     <ROUTE fromNode="TIT1" fromField="triggerTime" toNode="SNAP" toField="startTime" />
     
     <ROUTE fromNode="LEG_BOX" fromField="isTouched" toNode="MFtoSF2" toField="value" />
