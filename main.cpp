@@ -24,7 +24,7 @@ int calculateIntersection(sgct::SGCTTrackingDevice *wand);
 sgct::SharedVector<glm::mat4> sharedTransforms;
 sgct::SharedString sharedText;
 sgct::SharedObject<size_t> sharedHeadSensorIndex(0);
-sgct::SharedVector<int> sharedSelect;
+sgct::SharedVector<bool> sharedSelect;
 sgct::SharedBool sharedbuttonPressed;
 
 glm::vec3 trackPos;
@@ -170,21 +170,16 @@ void myPreSyncFun()
 					}
 
 					bool pressed = devicePtr->getButton(5);
-					sharedbuttonPressed.setVal(pressed);
-					if (pressed)
+					if (pressed != sharedbuttonPressed.getVal())
 					{
-						int cubeIndex = calculateIntersection(devicePtr);
-
-						if(cubeIndex >= 0)
+						sharedbuttonPressed.setVal(pressed);
+						if (sharedbuttonPressed.getVal())
 						{
-							int value = sharedSelect.getValAt(cubeIndex);
-							if(value == 0)
-								value = 1;
-							else
-								value = 0;
-
-							sharedSelect.setValAt(cubeIndex, value);
-
+							int cubeIndex = calculateIntersection(devicePtr);
+							if (cubeIndex >= 0)
+							{
+								sharedSelect.setValAt(cubeIndex, !sharedSelect.getValAt(cubeIndex));
+							}
 						}
 					}
 
@@ -203,32 +198,24 @@ void myPreSyncFun()
 				ss << "\n";
 			}
 		}
-		bool pressed = sgct::Engine::getKey(gEngine->getFocusedWindowIndex(),'1');
-		if (pressed != sharedbuttonPressed.getVal())
-		{
-			sharedbuttonPressed.setVal(pressed);
-			//int cubeIndex = calculateIntersection(devicePtr);
-			//sharedSelect.setValAt(cubeIndex, !sharedSelect.getValAt(cubeIndex));
-			//trackPos = devicePtr->getPosition();
-			//trackrot = devicePtr->getEulerAngles();
-			if(sharedbuttonPressed.getVal())
-			{
-				int cubeIndex = calculateIntersection(NULL);
+		//bool pressed = sgct::Engine::getKey(gEngine->getFocusedWindowIndex(),'1');
+		//if (pressed != sharedbuttonPressed.getVal())
+		//{
+		//	sharedbuttonPressed.setVal(pressed);
 
-				if(cubeIndex >= 0)
-				{
-					int value = sharedSelect.getValAt(cubeIndex);
-					if(value == 0)
-						value = 1;
-					else
-						value = 0;
+		//	if(sharedbuttonPressed.getVal())
+		//	{
+		//		int cubeIndex = calculateIntersection(NULL);
 
-					sharedSelect.setValAt(cubeIndex, value);
+		//		if(cubeIndex >= 0)
+		//		{
+		//			sharedSelect.setValAt(cubeIndex, !sharedSelect.getValAt(cubeIndex));
 
-				}
-			}
-		}
-		//store the string stream into the shared string
+
+		//		}
+		//	}
+		//}
+		////store the string stream into the shared string
 		sharedText.setVal( ss.str() );
 	}
 }
@@ -394,7 +381,7 @@ int calculateIntersection(sgct::SGCTTrackingDevice *wand)
 	}
 
 	int cube = 0;
-	float cubeRadius = 0.08f;
+	float cubeRadius = 0.06f;
 
 	for (float i = -0.5f; i <= 0.5f; i += 0.2f)
 	{
